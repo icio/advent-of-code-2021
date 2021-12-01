@@ -6,12 +6,15 @@ import (
 )
 
 func main() {
-	var d [3]int
+	const w = 3 // w = 1 is equivalent to d1p1.
+	var d [w]int
 	var incrs int
 
-	_, err := fmt.Scan(&d[0], &d[1], &d[2])
-	if err != nil {
-		panic(err)
+	for i := 0; i < w; i++ {
+		_, err := fmt.Scan(&d[i])
+		if err != nil {
+			panic(err)
+		}
 	}
 	for {
 		var nextDepth int
@@ -25,7 +28,8 @@ func main() {
 		if nextDepth > d[0] {
 			incrs++
 		}
-		d[0], d[1], d[2] = d[1], d[2], nextDepth
+		copy(d[0:], d[1:])
+		d[w-1] = nextDepth
 	}
 	fmt.Println(incrs)
 }
