@@ -16,8 +16,6 @@ func main() {
 			days = 256
 		}
 	}
-	if len(os.Args) > 1 && os.Args[1] == "-t" {
-	}
 
 	var hist [9]int64
 	for _, f := range fish {
