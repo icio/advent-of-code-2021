@@ -10,6 +10,7 @@ type dest struct {
 	pos  int
 	cost int
 
+	// hereOrLeft is the number of crabs to the hereOrLeft of pos.
 	hereOrLeft int
 }
 
@@ -34,37 +35,44 @@ func main() {
 		}
 	}
 
-	d := 0
 	dests := make([]dest, u)
-	dests[d] = dest{
-		pos: input[0],
-	}
 
-	f := 0
-	for i := 1; i < n; i++ {
+	d := 0
+	cost := 0
+	for i := 0; i < n; i++ {
+		// Calculate the cost of travelling to the new position (we skip
+		// repeated positions below). Note that as the input is sorted, i is
+		// also the number of crabs to the left of this position.
 		pos := input[i]
-		if pos == input[i-1] {
-			dests[d].hereOrLeft++
-			continue
+		if d > 0 {
+			cost += i * (pos - dests[d-1].pos)
 		}
 
-		f += i * (pos - dests[d].pos)
+		// Progress i to the last input at the same position.
+		for i < n-1 && pos == input[i+1] {
+			i++
+		}
 
-		d++
+		// Record of moving crabs rightwards to pos.
 		dests[d] = dest{
 			pos:        pos,
-			cost:       f,
-			hereOrLeft: i,
+			cost:       cost,
+			hereOrLeft: i + 1,
 		}
+		d++
 	}
 
 	// Move d back to the cheapest destination.
-	f = 0
-	for d--; d >= 0; d-- {
-		next := dests[d+1]
-		f += (n - next.hereOrLeft) * (next.pos - dests[d].pos)
-		dests[d].cost += f
-		if dests[d].cost > next.cost {
+	cost = 0
+	for d -= 2; d >= 0; d-- {
+		// Calculate the cost of moving crabs leftwards to this position.
+		cost += (n - dests[d].hereOrLeft) * (dests[d+1].pos - dests[d].pos)
+		dests[d].cost += cost
+
+		// If the cost of this position is higher than that to the right then
+		// the position at dests[d+1] is optimal. It's only going to get more
+		// expensive to move further left.
+		if dests[d].cost > dests[d+1].cost {
 			d++
 			break
 		}
