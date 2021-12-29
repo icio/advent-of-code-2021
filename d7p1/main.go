@@ -7,18 +7,10 @@ import (
 )
 
 type dest struct {
-	pos int
+	pos  int
+	cost int
 
-	count  int
-	countL int
-	countR int
-
-	costR int
-	costL int
-}
-
-func (d dest) cost() int {
-	return d.costR + d.costL
+	hereOrLeft int
 }
 
 func main() {
@@ -31,6 +23,7 @@ func main() {
 	if test {
 		input = []int{16, 1, 2, 0, 4, 2, 7, 1, 2, 14}
 	}
+	n := len(input)
 	sort.Ints(input)
 
 	// Count unique positions.
@@ -44,40 +37,38 @@ func main() {
 	d := 0
 	dests := make([]dest, u)
 	dests[d] = dest{
-		pos:   input[0],
-		count: 1,
-		costL: 0,
+		pos: input[0],
 	}
-	for i := 1; i < len(input); i++ {
+
+	f := 0
+	for i := 1; i < n; i++ {
 		pos := input[i]
 		if pos == input[i-1] {
-			dests[d].count++
+			dests[d].hereOrLeft++
 			continue
 		}
 
-		prev := dests[d]
-		countL := prev.count + prev.countL
+		f += i * (pos - dests[d].pos)
 
 		d++
 		dests[d] = dest{
-			pos:    pos,
-			count:  1,
-			countL: countL,
-			costL:  prev.costL + countL*(pos-prev.pos),
+			pos:        pos,
+			cost:       f,
+			hereOrLeft: i,
 		}
 	}
 
 	// Move d back to the cheapest destination.
+	f = 0
 	for d--; d >= 0; d-- {
 		next := dests[d+1]
-		countR := next.countR + next.count
-		dests[d].countR = countR
-		dests[d].costR = next.costR + countR*(next.pos-dests[d].pos)
-		if dests[d].cost() > next.cost() {
+		f += (n - next.hereOrLeft) * (next.pos - dests[d].pos)
+		dests[d].cost += f
+		if dests[d].cost > next.cost {
 			d++
 			break
 		}
 	}
 
-	fmt.Printf("%#v\t%d\n", dests[d], dests[d].cost())
+	fmt.Printf("%#v\t%d\n", dests[d], dests[d].cost)
 }
