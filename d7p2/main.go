@@ -7,9 +7,12 @@ import (
 	"strings"
 )
 
+var enableDebug bool
+
 func main() {
 	var test bool
 	flag.BoolVar(&test, "test", false, "use example/test data")
+	flag.BoolVar(&enableDebug, "debug", false, "debug")
 	flag.Parse()
 
 	// Input crab positions.
@@ -41,8 +44,12 @@ func main() {
 	}
 
 	debug("lp", "li", "dlc", "lc", "rp", "ri", "drc", "rc")
-	for lp != rp {
+	for {
 		debug(lp, li, dlc, lc, rp, ri, drc, rc)
+		if lp == rp {
+			// All crabs are aligned.
+			break
+		}
 		if dlc <= drc {
 			// Cheaper to move li crabs 1 step to the right.
 			lp++
@@ -74,7 +81,9 @@ func main() {
 }
 
 func debug(v ...interface{}) {
-	return
-	const vf = "% 4v"
+	if !enableDebug {
+		return
+	}
+	const vf = "% 9v"
 	fmt.Printf(vf+strings.Repeat(vf, len(v)-1)+"\n", v...)
 }
