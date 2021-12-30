@@ -63,6 +63,11 @@ func main() {
 	}
 
 	// Move d back to the cheapest destination.
+	//
+	// FIXME: This only works because the optimal position is present in the
+	// input. If it were absent from the input, we would get a position to the
+	// left or right. In part 2, the optimal position is not present in the
+	// input so this doesn't work.
 	cost = 0
 	for d -= 2; d >= 0; d-- {
 		// Calculate the cost of moving crabs leftwards to this position.
