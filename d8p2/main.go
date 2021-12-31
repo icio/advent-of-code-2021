@@ -9,6 +9,7 @@ import (
 func main() {
 	var sum int64
 	for {
+		// Scan the input.
 		var sig [10]string
 		var sep string
 		var out [4]string
@@ -27,6 +28,7 @@ func main() {
 			panic(fmt.Errorf("failed to scan 15 values"))
 		}
 
+		// Pick out the obvious digits.
 		ds := [10]digit{
 			8: wordnum("abcdefg"),
 		}
@@ -42,33 +44,68 @@ func main() {
 				ds[4] = d
 			}
 		}
+
+		/*
+			  0:        1:        2:        3:        4:
+			 aaaa      ....      aaaa      aaaa      ....
+			b    c    .    c    .    c    .    c    b    c
+			b    c    .    c    .    c    .    c    b    c
+			 ....      ....      dddd      dddd      dddd
+			e    f    .    f    e    .    .    f    .    f
+			e    f    .    f    e    .    .    f    .    f
+			 gggg      ....      gggg      gggg      ....
+
+			  5:        6:        7:        8:        9:
+			 aaaa      aaaa      aaaa      aaaa      aaaa
+			b    .    b    .    .    c    b    c    b    c
+			b    .    b    .    .    c    b    c    b    c
+			 dddd      dddd      ....      dddd      dddd
+			.    f    e    f    .    f    e    f    .    f
+			.    f    e    f    .    f    e    f    .    f
+			 gggg      gggg      ....      gggg      gggg
+
+			Here we can see that "3" contains "1" because all of the segments
+			used by "1" are also used by "3".
+		*/
+
+		// Use the obvious digits to figure out the other digits.
 		var d2or5 digit
 		for _, word := range sig {
 			d := wordnum(word)
 			switch len(word) {
+			// "1", "4", "7", "8" were identified above.
 			case 2, 3, 4, 7:
 				continue
+
+			// "2", "3" and "5" have 5 segments.
 			case 5:
-				// 2, 3, 5
+				// "3" contains "1" whereas "2" and "5" do not.
 				if d&ds[1] == ds[1] {
 					ds[3] = d
 					continue
 				}
+
+				// We need to compare "2" with "5", so store for later.
 				if d2or5 == 0 {
 					d2or5 = d
 					continue
 				}
+
+				// "5" has more overlapping segments with "4" than "2" has.
 				if bits(d&ds[4]) > bits(d2or5&ds[4]) {
 					ds[5], ds[2] = d, d2or5
 					continue
 				}
 				ds[2], ds[5] = d, d2or5
+
+			// "0", "6" and "9" have 6 segments.
 			case 6:
-				// 0, 6, 9
+				// "6" does not contain "1" whereas "0" and "9" do.
 				if d&ds[1] != ds[1] {
 					ds[6] = d
 					continue
 				}
+				// "9" contains "4" whereas "0" does not.
 				if d&ds[4] == ds[4] {
 					ds[9] = d
 					continue
@@ -77,6 +114,7 @@ func main() {
 			}
 		}
 
+		// Convert the out words into digits.
 		outnum := 0
 		base := 1000
 		for _, word := range out {
@@ -90,8 +128,10 @@ func main() {
 			base /= 10
 		}
 		fmt.Println(strings.Join(out[:], " "), "=", outnum)
+
 		sum += int64(outnum)
 	}
+
 	fmt.Println(sum)
 }
 
